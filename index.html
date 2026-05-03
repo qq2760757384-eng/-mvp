@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AniPure · 安纯 — 全球动漫纯净播放</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0A0C;--surface:#141418;--surface2:#1C1C22;--surface3:#26262E;
+  --primary:#FF6B9D;--primary-d:#E84A7F;--primary-g:rgba(255,107,157,.12);
+  --t1:#F0F0F2;--t2:#A0A0A8;--t3:#606068;
+  --ok:#34C759;--warn:#FF9F0A;--err:#FF453A;
+  --r:12px;--r2:16px;--r3:24px;
+  --ease:cubic-bezier(.4,0,.2,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+}
+html{font-family:-apple-system,'SF Pro Display','Noto Sans SC','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+input,button,select{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* ===== LAYOUT ===== */
+.app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;overflow-x:hidden}
+@media(min-width:768px){.app{max-width:1200px}}
+
+/* ===== TOPBAR ===== */
+.topbar{position:sticky;top:0;z-index:90;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);background:rgba(10,10,12,.72);border-bottom:1px solid rgba(255,255,255,.04)}
+.logo{display:flex;align-items:baseline;gap:6px}
+.logo-icon{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--primary),#FF9EB5);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff}
+.logo-text{font-size:20px;font-weight:700;letter-spacing:-.6px;background:linear-gradient(135deg,var(--primary),#FFB4CC);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:11px;color:var(--t3);letter-spacing:1px}
+
+/* ===== SEARCH ===== */
+.search-area{padding:8px 20px 0;position:sticky;top:56px;z-index:80;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(10,10,12,.6)}
+.search{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2);padding:10px 14px;transition:.25s var(--ease)}
+.search:focus-within{border-color:rgba(255,107,157,.4);box-shadow:0 0 0 3px rgba(255,107,157,.08);background:rgba(255,255,255,.07)}
+.search svg{flex-shrink:0;color:var(--t3)}
+.search input{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:15px}
+.search input::placeholder{color:var(--t3)}
+
+/* ===== SECTION ===== */
+.sec{padding:20px 20px 0}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sec-title::before{content:'';width:3px;height:16px;background:var(--primary);border-radius:2px}
+.sec-more{font-size:13px;color:var(--t3);cursor:pointer}
+
+/* ===== HERO ===== */
+.hero{margin:14px 20px 0;border-radius:var(--r2);overflow:hidden;position:relative;height:200px;cursor:pointer;transition:transform .3s var(--ease)}
+.hero:active{transform:scale(.98)}
+.hero-canvas{position:absolute;inset:0}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,12,.95) 0%,rgba(10,10,12,.3) 50%,rgba(10,10,12,.1) 100%)}
+.hero-content{position:absolute;bottom:0;left:0;right:0;padding:20px}
+.hero-tag{display:inline-flex;align-items:center;gap:4px;background:var(--primary);color:#fff;font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
+.hero-name{font-size:24px;font-weight:700;letter-spacing:-.4px;line-height:1.2}
+.hero-info{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:var(--t2)}
+.hero-info .sep{width:3px;height:3px;border-radius:50%;background:var(--t3)}
+.hero-play{position:absolute;right:20px;bottom:24px;width:48px;height:48px;border-radius:50%;background:var(--primary);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(255,107,157,.4);transition:.2s var(--spring)}
+.hero-play:hover{transform:scale(1.08);box-shadow:0 6px 32px rgba(255,107,157,.5)}
+.hero-play:active{transform:scale(.95)}
+
+/* ===== HORIZONTAL CARDS ===== */
+.h-row{display:flex;gap:12px;overflow-x:auto;padding:0 20px 10px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none}
+.h-row::-webkit-scrollbar{display:none}
+.h-card{flex-shrink:0;width:140px;scroll-snap-align:start;cursor:pointer;transition:transform .25s var(--ease)}
+.h-card:active{transform:scale(.96)}
+.h-card-img{width:140px;height:190px;border-radius:var(--r);overflow:hidden;position:relative;background:var(--surface2)}
+.h-card-img canvas{width:100%;height:100%}
+.h-card-badge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;backdrop-filter:blur(8px)}
+.h-card-badge.watching{background:rgba(52,199,89,.2);color:var(--ok)}
+.h-card-badge.new{background:rgba(255,159,10,.2);color:var(--warn)}
+.h-card-prog{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.1)}
+.h-card-prog-bar{height:100%;background:var(--primary);border-radius:0 2px 0 0;transition:width .3s}
+.h-card-ep{position:absolute;bottom:8px;left:8px;font-size:10px;background:rgba(0,0,0,.65);padding:2px 8px;border-radius:6px;backdrop-filter:blur(8px)}
+.h-card-title{font-size:12px;font-weight:500;margin-top:8px;line-height:1.35;color:var(--t1)}
+
+/* ===== GRID CARDS ===== */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:0 20px}
+@media(min-width:768px){.grid{grid-template-columns:repeat(6,1fr)}}
+.g-card{cursor:pointer;transition:transform .25s var(--ease)}
+.g-card:active{transform:scale(.96)}
+.g-card-img{width:100%;aspect-ratio:3/4;border-radius:var(--r);overflow:hidden;position:relative;background:var(--surface2)}
+.g-card-img canvas{width:100%;height:100%}
+.g-card-score{position:absolute;top:6px;right:6px;font-size:10px;font-weight:600;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);padding:2px 7px;border-radius:6px;color:var(--warn);display:flex;align-items:center;gap:2px}
+.g-card-score::before{content:'★';font-size:9px}
+.g-card-title{font-size:12px;font-weight:500;margin-top:8px;line-height:1.35}
+.g-card-meta{font-size:10px;color:var(--t3);margin-top:3px}
+
+/* ===== TABS ===== */
+.tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:90;display:flex;backdrop-filter:blur(24px) saturate(1.6);-webkit-backdrop-filter:blur(24px) saturate(1.6);background:rgba(10,10,12,.85);border-top:1px solid rgba(255,255,255,.04);padding:6px 0 max(env(safe-area-inset-bottom),8px)}
+@media(min-width:768px){.tabs{max-width:1200px}}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tab svg{width:22px;height:22px;stroke:var(--t3);fill:none;stroke-width:1.8;transition:.2s}
+.tab span{font-size:10px;color:var(--t3);transition:.2s;letter-spacing:.3px}
+.tab.on svg{stroke:var(--primary)}
+.tab.on span{color:var(--primary)}
+
+/* ===== PAGES ===== */
+.page{display:none;padding-bottom:80px}
+.page.on{display:block}
+
+/* ===== MODAL ===== */
+.modal-bg{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;opacity:0;transition:.3s}
+.modal-bg.show{display:block;opacity:1}
+.modal-sheet{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;max-height:88dvh;z-index:210;background:var(--surface);border-radius:var(--r3) var(--r3) 0 0;overflow-y:auto;transition:.4s var(--ease)}
+.modal-bg.show .modal-sheet{transform:translateX(-50%) translateY(0)}
+@media(min-width:768px){
+  .modal-sheet{max-width:560px;border-radius:var(--r3);bottom:50%;transform:translate(-50%,50%) translateY(30px);opacity:0}
+  .modal-bg.show .modal-sheet{transform:translate(-50%,50%) translateY(0);opacity:1}
+}
+.modal-bar{width:36px;height:4px;background:var(--surface3);border-radius:2px;margin:10px auto 0}
+.modal-hero{height:220px;position:relative;overflow:hidden}
+.modal-hero canvas{position:absolute;inset:0;width:100%;height:100%}
+.modal-hero-overlay{position:absolute;inset:0;background:linear-gradient(0deg,var(--surface) 0%,transparent 60%)}
+.modal-hero-info{position:absolute;bottom:16px;left:20px;right:20px}
+.modal-hero-title{font-size:22px;font-weight:700;line-height:1.2}
+.modal-hero-meta{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--t2)}
+.modal-hero-meta .sep{width:3px;height:3px;border-radius:50%;background:var(--t3)}
+.modal-btns{display:flex;gap:10px;padding:16px 20px}
+.btn-p{flex:1;padding:12px;border-radius:var(--r);border:none;background:var(--primary);color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s var(--ease)}
+.btn-p:hover{background:var(--primary-d)}
+.btn-p:active{transform:scale(.97)}
+.btn-s{padding:12px 18px;border-radius:var(--r);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t1);font-size:14px;cursor:pointer;transition:.2s}
+.btn-s:hover{background:rgba(255,255,255,.08)}
+.modal-sec{padding:0 20px 16px}
+.modal-sec-t{font-size:13px;font-weight:600;color:var(--t3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.modal-desc{font-size:14px;line-height:1.65;color:var(--t2)}
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px}
+.ep{padding:10px 0;border-radius:var(--r);border:1px solid rgba(255,255,255,.08);background:var(--surface2);color:var(--t1);font-size:13px;text-align:center;cursor:pointer;transition:.2s var(--ease)}
+.ep:hover{border-color:var(--primary);background:rgba(255,107,157,.08)}
+.ep.cur{background:var(--primary);border-color:var(--primary);color:#fff}
+.ep.done{border-color:rgba(52,199,89,.3);color:var(--ok)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,107,157,.08);color:var(--primary);border:1px solid rgba(255,107,157,.15)}
+
+/* ===== PLAYER ===== */
+.player{position:fixed;inset:0;z-index:300;background:#000;display:none;flex-direction:column}
+.player.on{display:flex}
+.player-vid{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.player-canvas{position:absolute;inset:0;width:100%;height:100%}
+.player-top{position:absolute;top:0;left:0;right:0;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(rgba(0,0,0,.55),transparent);z-index:3}
+.player-back{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:8px;opacity:.9}
+.player-back:hover{opacity:1}
+.player-top-t{font-size:15px;font-weight:500}
+.player-big{position:relative;z-index:2;width:64px;height:64px;border-radius:50%;background:rgba(255,107,157,.85);border:none;color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:.2s var(--spring)}
+.player-big:hover{transform:scale(1.1)}
+.player-big:active{transform:scale(.92)}
+.player-ep-t{position:relative;z-index:2;color:var(--t2);font-size:13px;margin-top:12px}
+.player-ctrl{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:8px 16px 16px;z-index:3}
+.player-prog{width:100%;height:3px;background:rgba(255,255,255,.15);border-radius:2px;cursor:pointer;position:relative;transition:height .15s}
+.player-prog:hover{height:6px}
+.player-prog-fill{height:100%;background:var(--primary);border-radius:2px;position:relative;transition:width .1s linear}
+.player-prog-fill::after{content:'';position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:var(--primary);border-radius:50%;opacity:0;transition:opacity .15s}
+.player-prog:hover .player-prog-fill::after{opacity:1}
+.player-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.player-l,.player-r{display:flex;align-items:center;gap:14px}
+.pbtn{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;padding:4px;opacity:.85;transition:.15s}
+.pbtn:hover{opacity:1;color:var(--primary)}
+.ptime{font-size:12px;color:var(--t2);font-variant-numeric:tabular-nums}
+.pbadge{font-size:11px;background:rgba(255,255,255,.12);padding:2px 8px;border-radius:4px;cursor:pointer;transition:.15s}
+.pbadge:hover{background:rgba(255,255,255,.2)}
+
+/* Gesture toast */
+.gesture{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.7);backdrop-filter:blur(12px);padding:14px 20px;border-radius:var(--r);display:none;align-items:center;gap:10px;z-index:5}
+.gesture.show{display:flex}
+.gesture-icon{font-size:22px}
+.gesture-track{width:100px;height:4px;background:rgba(255,255,255,.15);border-radius:2px;overflow:hidden}
+.gesture-fill{height:100%;background:var(--primary);border-radius:2px;transition:width .1s}
+.gesture-val{font-size:13px;color:var(--t2);min-width:36px;text-align:right}
+
+/* ===== SETTINGS ===== */
+.about-box{text-align:center;padding:40px 20px 24px}
+.about-logo{font-size:44px;font-weight:800;background:linear-gradient(135deg,var(--primary),#FFB4CC);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.about-slogan{color:var(--t2);font-size:14px;margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.stat{background:var(--surface);border-radius:var(--r);padding:18px 8px}
+.stat-n{font-size:26px;font-weight:700;color:var(--primary)}
+.stat-l{font-size:11px;color:var(--t3);margin-top:2px}
+.set-group{margin:0 20px 20px}
+.set-group-t{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;padding-left:4px}
+.set-item{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:var(--surface);cursor:pointer;transition:background .15s}
+.set-item:hover{background:var(--surface2)}
+.set-item:first-child{border-radius:var(--r) var(--r) 4px 4px}
+.set-item:last-child{border-radius:4px 4px var(--r) var(--r)}
+.set-item:only-child{border-radius:var(--r)}
+.set-left{display:flex;align-items:center;gap:12px}
+.set-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--surface2)}
+.set-label{font-size:14px}
+.set-val{font-size:13px;color:var(--t3);display:flex;align-items:center;gap:4px}
+/* Toggle */
+.sw{position:relative;width:44px;height:26px;cursor:pointer;flex-shrink:0}
+.sw input{display:none}
+.sw-track{position:absolute;inset:0;background:var(--surface3);border-radius:13px;transition:.25s var(--ease)}
+.sw input:checked+.sw-track{background:var(--primary)}
+.sw-dot{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.25s var(--spring);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw input:checked~.sw-dot{left:21px}
+/* Select */
+.sel{background:var(--surface2);border:1px solid rgba(255,255,255,.08);color:var(--t1);padding:5px 10px;border-radius:8px;font-size:13px;outline:none;cursor:pointer}
+.sel:focus{border-color:var(--primary)}
+/* Slider */
+.sld-wrap{display:flex;align-items:center;gap:10px}
+.sld{-webkit-appearance:none;width:100px;height:4px;background:var(--surface3);border-radius:2px;outline:none}
+.sld::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--primary);border-radius:50%;cursor:pointer;box-shadow:0 2px 6px rgba(255,107,157,.35)}
+.sld-v{font-size:12px;color:var(--t2);min-width:32px;text-align:right}
+
+/* ===== EMPTY ===== */
+.empty{display:flex;flex-direction:column;align-items:center;padding:60px 20px;color:var(--t3)}
+.empty-i{font-size:44px;margin-bottom:12px;opacity:.4}
+.empty-t{font-size:14px}
+
+/* ===== ANIM ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s var(--ease) both}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}
+
+/* ===== RESPONSIVE ===== */
+@media(min-width:768px){
+  .hero{height:300px}
+  .h-card{width:170px}
+  .h-card-img{width:170px;height:230px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo"><div class="logo-icon">A</div><div class="logo-text">AniPure</div><div class="logo-sub">安纯</div></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-area">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="sInput" placeholder="搜索番剧、声优、制作公司..." oninput="doSearch(this.value)">
+    </div>
+  </div>
+
+  <!-- DISCOVER -->
+  <div class="page on" id="pg-disc">
+    <canvas class="hero" id="heroCanvas" width="800" height="400"></canvas>
+    <div class="hero-overlay"></div>
+    <div class="hero-content" onclick="openDetail(0)" style="cursor:pointer">
+      <div class="hero-tag">热播中</div>
+      <div class="hero-name" id="heroName"></div>
+      <div class="hero-info" id="heroInfo"></div>
+    </div>
+    <button class="hero-play" onclick="event.stopPropagation();openPlayer(0,6)">▶</button>
+
+    <div class="sec fade-up d1"><div class="sec-head"><div class="sec-title">正在追番</div></div></div>
+    <div class="h-row fade-up d1" id="hRow"></div>
+
+    <div class="sec fade-up d2"><div class="sec-head"><div class="sec-title">热门推荐</div></div></div>
+    <div class="grid fade-up d2" id="gGrid"></div>
+  </div>
+
+  <!-- FOLLOWING -->
+  <div class="page" id="pg-fav">
+    <div class="sec"><div class="sec-title">我的追番</div></div>
+    <div id="favList" style="padding:12px 20px"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="pg-hist">
+    <div class="sec"><div class="sec-title">观看历史</div></div>
+    <div id="histList" style="padding:12px 20px"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="pg-set">
+    <div class="about-box">
+      <div class="about-logo">AniPure</div>
+      <div class="about-slogan">全球动漫，原画直看，永久免费无广告</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n">5</div><div class="stat-l">覆盖区域</div></div>
+        <div class="stat"><div class="stat-n">0</div><div class="stat-l">广告数量</div></div>
+        <div class="stat"><div class="stat-n">∞</div><div class="stat-l">免费使用</div></div>
+      </div>
+    </div>
+    <div id="setArea"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="mBg" onclick="closeModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-bar"></div>
+    <div class="modal-hero"><canvas id="mCanvas" width="600" height="300"></canvas><div class="modal-hero-overlay"></div>
+      <div class="modal-hero-info"><div class="modal-hero-title" id="mTitle"></div><div class="modal-hero-meta" id="mMeta"></div></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-p" id="mPlay" onclick="playFromModal()">▶ 继续观看</button>
+      <button class="btn-s" id="mFav" onclick="toggleFav()">+ 追番</button>
+    </div>
+    <div class="modal-sec"><div class="modal-sec-t">简介</div><div class="modal-desc" id="mDesc"></div></div>
+    <div class="modal-sec"><div class="modal-sec-t">选集</div><div class="ep-grid" id="mEps"></div></div>
+    <div class="modal-sec" style="padding-bottom:24px"><div class="modal-sec-t">标签</div><div class="tags" id="mTags"></div></div>
+  </div>
+</div>
+
+<!-- PLAYER -->
+<div class="player" id="player">
+  <div class="player-vid">
+    <canvas class="player-canvas" id="pCanvas"></canvas>
+    <div class="player-top">
+      <button class="player-back" onclick="closePlayer()">←</button>
+      <div class="player-top-t" id="pTitle"></div>
+      <div style="width:36px"></div>
+    </div>
+    <button class="player-big" id="pBig" onclick="togglePlay()">▶</button>
+    <div class="player-ep-t" id="pEpT"></div>
+    <div class="gesture" id="gLeft"><div class="gesture-icon">☀</div><div class="gesture-track"><div class="gesture-fill" id="gBri" style="width:70%"></div></div><div class="gesture-val">70%</div></div>
+    <div class="gesture" id="gRight"><div class="gesture-icon">🔊</div><div class="gesture-track"><div class="gesture-fill" id="gVol" style="width:80%"></div></div><div class="gesture-val">80%</div></div>
+    <div class="player-ctrl">
+      <div class="player-prog" id="pProg" onclick="seekTo(event)"><div class="player-prog-fill" id="pFill"></div></div>
+      <div class="player-row">
+        <div class="player-l">
+          <button class="pbtn" id="pPlayBtn" onclick="togglePlay()">▶</button>
+          <button class="pbtn" onclick="skip(-15)">↺</button>
+          <button class="pbtn" onclick="skip(15)">↻</button>
+          <span class="ptime"><span id="pCur">0:00</span> / <span id="pTot">23:45</span></span>
+        </div>
+        <div class="player-r">
+          <button class="pbtn">CC</button>
+          <button class="pbtn">弹</button>
+          <span class="pbadge" id="pQ" onclick="cycleQ()">原画</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab on" data-p="disc" onclick="goTab(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88" stroke-linejoin="round"/></svg><span>发现</span></div>
+  <div class="tab" data-p="fav" onclick="goTab(this)"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg><span>追番</span></div>
+  <div class="tab" data-p="hist" onclick="goTab(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>历史</span></div>
+  <div class="tab" data-p="set" onclick="goTab(this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>设置</span></div>
+</div>
+
+<script>
+// ===== DATA =====
+const A=[
+  {t:'鬼灭之刃 柱训练篇',r:9.8,ep:8,cur:7,g:['奇幻','战斗','热血'],c1:'#7C3AED',c2:'#A78BFA',d:'炭治郎等人为了迎接与鬼舞辻无惨的最终决战，接受了柱们的严格训练。',s:'连载中',y:'2024',fav:1},
+  {t:'海贼王',r:9.7,ep:1089,cur:1052,g:['冒险','热血','奇幻'],c1:'#DC2626',c2:'#F87171',d:'蒙奇·D·路飞为了成为海贼王，与伙伴们一起在大海上冒险的故事。',s:'连载中',y:'1999',fav:1},
+  {t:'进击的巨人 最终季',r:9.6,ep:87,cur:87,g:['战斗','悬疑','奇幻'],c1:'#4F46E5',c2:'#818CF8',d:'艾伦·耶格尔的自由之战迎来终章。墙内与墙外的真相被揭开。',s:'已完结',y:'2013',fav:1},
+  {t:'咒术回战 第二季',r:9.5,ep:23,cur:23,g:['战斗','奇幻','校园'],c1:'#DB2777',c2:'#F472B6',d:'虎杖悠仁在涩谷事变后的成长故事。五条悟的过去被揭开。',s:'已完结',y:'2023',fav:0},
+  {t:'间谍过家家 第二季',r:9.4,ep:25,cur:12,g:['喜剧','日常','动作'],c1:'#D97706',c2:'#FCD34D',d:'间谍黄昏、杀手约尔、超能力者阿尼亚组成的虚假家庭。',s:'连载中',y:'2023',fav:1},
+  {t:'葬送的芙莉莲',r:9.7,ep:28,cur:28,g:['奇幻','冒险','治愈'],c1:'#059669',c2:'#6EE7B7',d:'魔王被打败后，精灵魔法使芙莉莲踏上了了解人类的旅程。',s:'已完结',y:'2023',fav:0},
+  {t:'排球少年!! 垃圾场决战',r:9.3,ep:10,cur:10,g:['运动','热血','青春'],c1:'#EA580C',c2:'#FB923C',d:'日向翔阳与影山飞雄在春高排球赛上与音驹高中的宿命对决。',s:'已完结',y:'2024',fav:0},
+  {t:'药屋少女的呢喃',r:9.5,ep:24,cur:24,g:['悬疑','宫廷','推理'],c1:'#9333EA',c2:'#C084FC',d:'猫猫在后宫中运用药学知识解决各种谜案。',s:'已完结',y:'2023',fav:0},
+  {t:'我独自升级',r:9.2,ep:12,cur:12,g:['动作','奇幻','升级'],c1:'#2563EB',c2:'#60A5FA',d:'程肖宇从最弱猎人成长为最强存在的故事。',s:'已完结',y:'2024',fav:0},
+  {t:'迷宫饭',r:9.1,ep:24,cur:12,g:['奇幻','美食','冒险'],c1:'#65A30D',c2:'#A3E635',d:'莱欧斯一行人在迷宫中一边冒险一边烹饪魔物料理。',s:'连载中',y:'2024',fav:0},
+  {t:'怪兽8号',r:9.0,ep:12,cur:12,g:['动作','科幻','热血'],c1:'#0891B2',c2:'#22D3EE',d:'日比野卡夫卡在32岁时变身为怪兽，获得了成为防卫队员的机会。',s:'已完结',y:'2024',fav:0},
+  {t:'蓝色监狱',r:9.1,ep:24,cur:24,g:['运动','竞技','心理'],c1:'#1D4ED8',c2:'#3B82F6',d:'为了培养世界最强前锋，300名天才少年被关进蓝色监狱。',s:'已完结',y:'2022',fav:0},
+  {t:'物理魔法使马修',r:8.9,ep:12,cur:12,g:['喜剧','奇幻','校园'],c1:'#C026D3',c2:'#E879F9',d:'在魔法至上的世界里，马修用纯粹的物理力量闯出一片天。',s:'已完结',y:'2023',fav:0},
+  {t:'天国大魔境',r:9.2,ep:13,cur:13,g:['冒险','悬疑','末世'],c1:'#57534E',c2:'#A8A29E',d:'在末日后的日本，少年与少女踏上了寻找"天国"的旅程。',s:'已完结',y:'2023',fav:0},
+];
+
+// ===== CANVAS DRAW =====
+function drawPoster(canvas,a,large){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  // Gradient bg
+  const g=ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0,a.c1);g.addColorStop(1,a.c2);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // Noise
+  const img=ctx.getImageData(0,0,W,H);
+  for(let i=0;i<img.data.length;i+=4){
+    const n=(Math.random()-.5)*30;
+    img.data[i]+=n;img.data[i+1]+=n;img.data[i+2]+=n;
+  }
+  ctx.putImageData(img,0,0);
+  // Geometric shapes
+  ctx.globalAlpha=.08;
+  for(let i=0;i<5;i++){
+    ctx.fillStyle='#fff';
+    ctx.beginPath();
+    const x=Math.random()*W,y=Math.random()*H,s=Math.random()*80+40;
+    ctx.arc(x,y,s,0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  // Title letter
+  ctx.fillStyle='rgba(255,255,255,.1)';
+  ctx.font=`bold ${large?120:52}px sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(a.t[0],W/2,H/2);
+  // Diagonal line
+  ctx.strokeStyle='rgba(255,255,255,.06)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,H*.3);ctx.lineTo(W,H*.7);ctx.stroke();
+}
+
+// ===== STATE =====
+let curDetail=null,playing=false,prog=0,lastT=0,qs=['流畅','高清','原画'],qi=2;
+
+// ===== INIT =====
+function init(){
+  // Hero
+  const hc=document.getElementById('heroCanvas');
+  drawPoster(hc,A[0],true);
+  document.getElementById('heroName').textContent=A[0].t;
+  document.getElementById('heroInfo').innerHTML=`<span>★ ${A[0].r}</span><span class="sep"></span><span>第${A[0].cur}集</span><span class="sep"></span><span>${A[0].g.join(' / ')}</span>`;
+  renderHRow();renderGrid();renderFav();renderHist();renderSet();
+}
+
+function renderHRow(){
+  const el=document.getElementById('hRow');
+  const watch=A.filter(a=>a.fav&&a.cur<a.ep);
+  el.innerHTML=watch.map((a,i)=>{
+    const id=A.indexOf(a);
+    return`<div class="h-card" onclick="openDetail(${id})"><div class="h-card-img"><canvas width="280" height="380" data-i="${id}" data-t="h"></canvas><div class="h-card-badge watching">追番中</div><div class="h-card-prog"><div class="h-card-prog-bar" style="width:${Math.round(a.cur/a.ep*100)}%"></div></div><div class="h-card-ep">第${a.cur}集</div></div><div class="h-card-title">${a.t}</div></div>`;
+  }).join('');
+  el.querySelectorAll('canvas[data-t="h"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+}
+
+function renderGrid(){
+  const el=document.getElementById('gGrid');
+  el.innerHTML=A.map((a,i)=>`<div class="g-card" onclick="openDetail(${i})"><div class="g-card-img"><canvas width="200" height="267" data-i="${i}" data-t="g"></canvas><div class="g-card-score">${a.r}</div></div><div class="g-card-title">${a.t}</div><div class="g-card-meta">${a.ep}集 · ${a.y}</div></div>`).join('');
+  el.querySelectorAll('canvas[data-t="g"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+}
+
+function renderFav(){
+  const el=document.getElementById('favList');
+  const favs=A.filter(a=>a.fav);
+  if(!favs.length){el.innerHTML='<div class="empty"><div class="empty-i">📚</div><div class="empty-t">还没有追番</div></div>';return}
+  el.innerHTML=favs.map(a=>{const i=A.indexOf(a);return`<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" onclick="openDetail(${i})"><div style="width:72px;height:96px;border-radius:10px;overflow:hidden;flex-shrink:0"><canvas width="144" height="192" data-i="${i}" data-t="f"></canvas></div><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div style="font-size:14px;font-weight:600">${a.t}</div><div style="font-size:12px;color:var(--t2);margin-top:4px">看到第${a.cur}集 / 共${a.ep}集</div><div style="font-size:11px;color:var(--ok);margin-top:6px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--ok);border-radius:50%;display:inline-block"></span>${a.s}</div></div></div>`}).join('');
+  el.querySelectorAll('canvas[data-t="f"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+}
+
+function renderHist(){
+  const el=document.getElementById('histList');
+  const h=A.slice(0,5);
+  el.innerHTML=h.map((a,i)=>{const id=A.indexOf(a);return`<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" onclick="openDetail(${id})"><div style="width:72px;height:96px;border-radius:10px;overflow:hidden;flex-shrink:0"><canvas width="144" height="192" data-i="${id}" data-t="h2"></canvas></div><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div style="font-size:14px;font-weight:600">${a.t}</div><div style="font-size:12px;color:var(--t3);margin-top:4px">${['刚刚','5分钟前','1小时前','昨天','2天前'][i]}</div></div></div>`}).join('');
+  el.querySelectorAll('canvas[data-t="h2"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+}
+
+function renderSet(){
+  const el=document.getElementById('setArea');
+  const gs=[
+    {g:'播放设置',items:[
+      {t:'toggle',l:'自动播放下一集',i:'▶',on:1},
+      {t:'select',l:'默认画质',i:'📺',o:['流畅','高清','原画'],v:'原画'},
+      {t:'toggle',l:'Anime4K 超分增强',i:'✨',on:0},
+      {t:'toggle',l:'弹幕默认开启',i:'💬',on:1},
+      {t:'slider',l:'弹幕透明度',i:'👁',v:80},
+    ]},
+    {g:'字幕设置',items:[
+      {t:'select',l:'默认字幕语言',i:'📝',o:['中文','日语','英语','韩语'],v:'中文'},
+    ]},
+    {g:'界面偏好',items:[
+      {t:'select',l:'主题',i:'🎨',o:['跟随系统','深色','浅色'],v:'深色'},
+      {t:'select',l:'语言',i:'🌐',o:['简体中文','English','日本語'],v:'简体中文'},
+    ]},
+    {g:'同步与存储',items:[
+      {t:'toggle',l:'WebDAV 多端同步',i:'☁',on:0},
+      {t:'action',l:'清理缓存',i:'🗑',v:'256 MB'},
+      {t:'select',l:'离线缓存上限',i:'💾',o:['2 GB','5 GB','10 GB','20 GB'],v:'10 GB'},
+    ]},
+    {g:'关于',items:[
+      {t:'info',l:'版本',i:'ℹ',v:'v1.0.0'},
+      {t:'action',l:'开源许可',i:'📄',v:'AGPL-3.0'},
+      {t:'action',l:'意见反馈',i:'💌',v:''},
+    ]},
+  ];
+  el.innerHTML=gs.map(g=>`<div class="set-group"><div class="set-group-t">${g.g}</div>${g.items.map(it=>{
+    if(it.t==='toggle')return`<div class="set-item"><div class="set-left"><div class="set-icon">${it.i}</div><div class="set-label">${it.l}</div></div><label class="sw"><input type="checkbox" ${it.on?'checked':''}><div class="sw-track"></div><div class="sw-dot"></div></label></div>`;
+    if(it.t==='select')return`<div class="set-item"><div class="set-left"><div class="set-icon">${it.i}</div><div class="set-label">${it.l}</div></div><select class="sel">${it.o.map(o=>`<option${o===it.v?' selected':''}>${o}</option>`).join('')}</select></div>`;
+    if(it.t==='slider')return`<div class="set-item"><div class="set-left"><div class="set-icon">${it.i}</div><div class="set-label">${it.l}</div></div><div class="sld-wrap"><input type="range" class="sld" min="0" max="100" value="${it.v}" oninput="this.nextElementSibling.textContent=this.value+'%'"><span class="sld-v">${it.v}%</span></div></div>`;
+    if(it.t==='info')return`<div class="set-item"><div class="set-left"><div class="set-icon">${it.i}</div><div class="set-label">${it.l}</div></div><div class="set-val">${it.v}</div></div>`;
+    if(it.t==='action')return`<div class="set-item"><div class="set-left"><div class="set-icon">${it.i}</div><div class="set-label">${it.l}</div></div><div class="set-val">${it.v} ›</div></div>`;
+  }).join('')}</div>`).join('');
+}
+
+// ===== TABS =====
+function goTab(el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+el.dataset.p).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== MODAL =====
+function openDetail(i){
+  curDetail=A[i];
+  drawPoster(document.getElementById('mCanvas'),curDetail,true);
+  document.getElementById('mTitle').textContent=curDetail.t;
+  document.getElementById('mMeta').innerHTML=`<span>★ ${curDetail.r}</span><span class="sep"></span><span>${curDetail.ep}集</span><span class="sep"></span><span>${curDetail.y}</span><span class="sep"></span><span>${curDetail.s}</span>`;
+  document.getElementById('mDesc').textContent=curDetail.d;
+  document.getElementById('mEps').innerHTML=Array.from({length:Math.min(curDetail.ep,24)},(_,j)=>`<div class="ep${j<curDetail.cur?' done':''}${j===curDetail.cur-1?' cur':''}" onclick="openPlayer(${i},${j})">${j+1}</div>`).join('');
+  document.getElementById('mTags').innerHTML=curDetail.g.map(g=>`<span class="tag">${g}</span>`).join('');
+  document.getElementById('mFav').textContent=curDetail.fav?'✓ 已追番':'+ 追番';
+  document.getElementById('mBg').classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('mBg').classList.remove('show');document.body.style.overflow=''}
+function toggleFav(){if(!curDetail)return;curDetail.fav^=1;document.getElementById('mFav').textContent=curDetail.fav?'✓ 已追番':'+ 追番';renderHRow();renderFav()}
+
+// ===== PLAYER =====
+function openPlayer(i,ep){
+  const a=A[i];closeModal();
+  document.getElementById('pTitle').textContent=a.t;
+  document.getElementById('pEpT').textContent=`第${ep+1}集 / 共${a.ep}集`;
+  prog=12+Math.random()*18;
+  document.getElementById('pFill').style.width=prog+'%';
+  const tot=23*60+45,cur=Math.floor(tot*prog/100);
+  document.getElementById('pCur').textContent=Math.floor(cur/60)+':'+String(cur%60).padStart(2,'0');
+  playing=false;lastT=0;
+  document.getElementById('pBig').style.display='';
+  document.getElementById('pPlayBtn').textContent='▶';
+  document.getElementById('player').classList.add('on');
+  document.body.style.overflow='hidden';
+  initPlayerCanvas(a);
+}
+function playFromModal(){if(!curDetail)return;openPlayer(A.indexOf(curDetail),curDetail.cur-1)}
+function closePlayer(){document.getElementById('player').classList.remove('on');document.body.style.overflow='';playing=false}
+
+// Player canvas
+let pCtx,pW,pH,pParts,pShapes;
+function initPlayerCanvas(a){
+  const c=document.getElementById('pCanvas');
+  c.width=c.offsetWidth*2;c.height=c.offsetHeight*2;
+  pCtx=c.getContext('2d');pW=c.width;pH=c.height;
+  pParts=Array.from({length:50},()=>({x:Math.random()*pW,y:Math.random()*pH,r:Math.random()*3+1,dx:(Math.random()-.5)*1.2,dy:(Math.random()-.5)*1.2,a:Math.random()*.3+.05}));
+  pShapes=Array.from({length:7},()=>({x:Math.random()*pW,y:Math.random()*pH,s:Math.random()*100+50,rot:Math.random()*6.28,dr:(Math.random()-.5)*.008,dx:(Math.random()-.5)*.5,c:a.c1}));
+}
+
+let pAnimT=0;
+function drawPlayer(){
+  if(!playing)return;
+  pAnimT++;
+  const ctx=pCtx;
+  // BG gradient
+  const hue=(pAnimT*.2)%360;
+  const g=ctx.createLinearGradient(0,0,pW,pH);
+  g.addColorStop(0,`hsl(${hue},35%,7%)`);g.addColorStop(.5,`hsl(${(hue+60)%360},25%,10%)`);g.addColorStop(1,`hsl(${(hue+120)%360},35%,5%)`);
+  ctx.fillStyle=g;ctx.fillRect(0,0,pW,pH);
+  // Shapes
+  pShapes.forEach(s=>{
+    s.x+=s.dx;s.rot+=s.dr;
+    if(s.x<-s.s)s.x=pW+s.s;if(s.x>pW+s.s)s.x=-s.s;
+    ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);
+    ctx.fillStyle=s.c+'12';ctx.beginPath();ctx.arc(0,0,s.s,0,6.28);ctx.fill();
+    ctx.restore();
+  });
+  // Particles
+  pParts.forEach(p=>{
+    p.x+=p.dx;p.y+=p.dy;
+    if(p.x<0)p.x=pW;if(p.x>pW)p.x=0;if(p.y<0)p.y=pH;if(p.y>pH)p.y=0;
+    ctx.fillStyle=`rgba(255,255,255,${p.a})`;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);ctx.fill();
+  });
+  // Scanlines
+  for(let y=0;y<pH;y+=4){ctx.fillStyle=`rgba(0,0,0,${.03+Math.sin((y+pAnimT)*.015)*.02})`;ctx.fillRect(0,y,pW,1);}
+  // Subtitles
+  const subs=['这段冒险才刚刚开始','我会变得更强的','绝不放弃','这就是我的忍道','守护最重要的人','总有一天会再见'];
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 28px sans-serif';ctx.textAlign='center';
+  ctx.fillText(subs[Math.floor(pAnimT/200)%subs.length],pW/2,pH*.82);
+  requestAnimationFrame(drawPlayer);
+}
+
+function togglePlay(){
+  playing=!playing;lastT=0;
+  document.getElementById('pPlayBtn').textContent=playing?'⏸':'▶';
+  document.getElementById('pBig').style.display=playing?'none':'';
+  if(playing)drawPlayer();
+}
+function skip(s){prog=Math.max(0,Math.min(100,prog+s/(23*60+45)*100));document.getElementById('pFill').style.width=prog+'%';updateTime()}
+function seekTo(e){const r=e.currentTarget.getBoundingClientRect();prog=Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100));document.getElementById('pFill').style.width=prog+'%';updateTime()}
+function updateTime(){const tot=23*60+45,cur=Math.floor(tot*prog/100);document.getElementById('pCur').textContent=Math.floor(cur/60)+':'+String(cur%60).padStart(2,'0')}
+function cycleQ(){qi=(qi+1)%qs.length;document.getElementById('pQ').textContent=qs[qi]}
+
+// Auto-progress
+setInterval(()=>{if(!playing)return;prog=Math.min(100,prog+.005);document.getElementById('pFill').style.width=prog+'%';updateTime()},1000);
+
+// ===== SEARCH =====
+function doSearch(q){
+  const el=document.getElementById('gGrid');
+  if(!q.trim()){renderGrid();return}
+  const res=A.filter(a=>a.t.includes(q)||a.g.some(g=>g.includes(q)));
+  if(!res.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-i">🔍</div><div class="empty-t">没有找到相关番剧</div></div>';return}
+  el.innerHTML=res.map(a=>{const i=A.indexOf(a);return`<div class="g-card" onclick="openDetail(${i})"><div class="g-card-img"><canvas width="200" height="267" data-i="${i}" data-t="gs"></canvas><div class="g-card-score">${a.r}</div></div><div class="g-card-title">${a.t}</div><div class="g-card-meta">${a.ep}集 · ${a.y}</div></div>`}).join('');
+  el.querySelectorAll('canvas[data-t="gs"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(document.getElementById('player').classList.contains('on'))closePlayer();else if(document.getElementById('mBg').classList.contains('show'))closeModal()}
+  if(e.key===' '&&document.getElementById('player').classList.contains('on')){e.preventDefault();togglePlay()}
+});
+
+init();
+</script>
+</body>
+</html>
