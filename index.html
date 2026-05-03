@@ -242,7 +242,7 @@ a{color:inherit;text-decoration:none}
 
   <!-- DISCOVER -->
   <div class="page on" id="pg-disc">
-    <canvas class="hero" id="heroCanvas" width="800" height="400"></canvas>
+    <div class="hero" id="heroWrap" style="background:linear-gradient(135deg,#7C3AED,#A78BFA)"><img id="heroImg" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.7"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content" onclick="openDetail(0)" style="cursor:pointer">
       <div class="hero-tag">热播中</div>
@@ -291,7 +291,7 @@ a{color:inherit;text-decoration:none}
 <div class="modal-bg" id="mBg" onclick="closeModal()">
   <div class="modal-sheet" onclick="event.stopPropagation()">
     <div class="modal-bar"></div>
-    <div class="modal-hero"><canvas id="mCanvas" width="600" height="300"></canvas><div class="modal-hero-overlay"></div>
+    <div class="modal-hero"><img id="mImg" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6"><div class="modal-hero-overlay"></div>
       <div class="modal-hero-info"><div class="modal-hero-title" id="mTitle"></div><div class="modal-hero-meta" id="mMeta"></div></div>
     </div>
     <div class="modal-btns">
@@ -307,7 +307,7 @@ a{color:inherit;text-decoration:none}
 <!-- PLAYER -->
 <div class="player" id="player">
   <div class="player-vid">
-    <canvas class="player-canvas" id="pCanvas"></canvas>
+    <video class="player-canvas" id="pVideo" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" playsinline></video>
     <div class="player-top">
       <button class="player-back" onclick="closePlayer()">←</button>
       <div class="player-top-t" id="pTitle"></div>
@@ -347,20 +347,20 @@ a{color:inherit;text-decoration:none}
 <script>
 // ===== DATA =====
 const A=[
-  {t:'鬼灭之刃 柱训练篇',r:9.8,ep:8,cur:7,g:['奇幻','战斗','热血'],c1:'#7C3AED',c2:'#A78BFA',d:'炭治郎等人为了迎接与鬼舞辻无惨的最终决战，接受了柱们的严格训练。',s:'连载中',y:'2024',fav:1},
-  {t:'海贼王',r:9.7,ep:1089,cur:1052,g:['冒险','热血','奇幻'],c1:'#DC2626',c2:'#F87171',d:'蒙奇·D·路飞为了成为海贼王，与伙伴们一起在大海上冒险的故事。',s:'连载中',y:'1999',fav:1},
-  {t:'进击的巨人 最终季',r:9.6,ep:87,cur:87,g:['战斗','悬疑','奇幻'],c1:'#4F46E5',c2:'#818CF8',d:'艾伦·耶格尔的自由之战迎来终章。墙内与墙外的真相被揭开。',s:'已完结',y:'2013',fav:1},
-  {t:'咒术回战 第二季',r:9.5,ep:23,cur:23,g:['战斗','奇幻','校园'],c1:'#DB2777',c2:'#F472B6',d:'虎杖悠仁在涩谷事变后的成长故事。五条悟的过去被揭开。',s:'已完结',y:'2023',fav:0},
-  {t:'间谍过家家 第二季',r:9.4,ep:25,cur:12,g:['喜剧','日常','动作'],c1:'#D97706',c2:'#FCD34D',d:'间谍黄昏、杀手约尔、超能力者阿尼亚组成的虚假家庭。',s:'连载中',y:'2023',fav:1},
-  {t:'葬送的芙莉莲',r:9.7,ep:28,cur:28,g:['奇幻','冒险','治愈'],c1:'#059669',c2:'#6EE7B7',d:'魔王被打败后，精灵魔法使芙莉莲踏上了了解人类的旅程。',s:'已完结',y:'2023',fav:0},
-  {t:'排球少年!! 垃圾场决战',r:9.3,ep:10,cur:10,g:['运动','热血','青春'],c1:'#EA580C',c2:'#FB923C',d:'日向翔阳与影山飞雄在春高排球赛上与音驹高中的宿命对决。',s:'已完结',y:'2024',fav:0},
-  {t:'药屋少女的呢喃',r:9.5,ep:24,cur:24,g:['悬疑','宫廷','推理'],c1:'#9333EA',c2:'#C084FC',d:'猫猫在后宫中运用药学知识解决各种谜案。',s:'已完结',y:'2023',fav:0},
-  {t:'我独自升级',r:9.2,ep:12,cur:12,g:['动作','奇幻','升级'],c1:'#2563EB',c2:'#60A5FA',d:'程肖宇从最弱猎人成长为最强存在的故事。',s:'已完结',y:'2024',fav:0},
-  {t:'迷宫饭',r:9.1,ep:24,cur:12,g:['奇幻','美食','冒险'],c1:'#65A30D',c2:'#A3E635',d:'莱欧斯一行人在迷宫中一边冒险一边烹饪魔物料理。',s:'连载中',y:'2024',fav:0},
-  {t:'怪兽8号',r:9.0,ep:12,cur:12,g:['动作','科幻','热血'],c1:'#0891B2',c2:'#22D3EE',d:'日比野卡夫卡在32岁时变身为怪兽，获得了成为防卫队员的机会。',s:'已完结',y:'2024',fav:0},
-  {t:'蓝色监狱',r:9.1,ep:24,cur:24,g:['运动','竞技','心理'],c1:'#1D4ED8',c2:'#3B82F6',d:'为了培养世界最强前锋，300名天才少年被关进蓝色监狱。',s:'已完结',y:'2022',fav:0},
-  {t:'物理魔法使马修',r:8.9,ep:12,cur:12,g:['喜剧','奇幻','校园'],c1:'#C026D3',c2:'#E879F9',d:'在魔法至上的世界里，马修用纯粹的物理力量闯出一片天。',s:'已完结',y:'2023',fav:0},
-  {t:'天国大魔境',r:9.2,ep:13,cur:13,g:['冒险','悬疑','末世'],c1:'#57534E',c2:'#A8A29E',d:'在末日后的日本，少年与少女踏上了寻找"天国"的旅程。',s:'已完结',y:'2023',fav:0},
+  {t:'鬼灭之刃 柱训练篇',r:9.8,ep:8,cur:7,g:['奇幻','战斗','热血'],c1:'#7C3AED',c2:'#A78BFA',d:'炭治郎等人为了迎接与鬼舞辻无惨的最终决战，接受了柱们的严格训练。',s:'连载中',y:'2024',fav:1,img:'https://cdn.myanimelist.net/images/anime/1010/138698l.jpg'},
+  {t:'海贼王',r:9.7,ep:1089,cur:1052,g:['冒险','热血','奇幻'],c1:'#DC2626',c2:'#F87171',d:'蒙奇·D·路飞为了成为海贼王，与伙伴们一起在大海上冒险的故事。',s:'连载中',y:'1999',fav:1,img:'https://cdn.myanimelist.net/images/anime/6/73245l.jpg'},
+  {t:'进击的巨人 最终季',r:9.6,ep:87,cur:87,g:['战斗','悬疑','奇幻'],c1:'#4F46E5',c2:'#818CF8',d:'艾伦·耶格尔的自由之战迎来终章。墙内与墙外的真相被揭开。',s:'已完结',y:'2013',fav:1,img:'https://cdn.myanimelist.net/images/anime/10/47347l.jpg'},
+  {t:'咒术回战 第二季',r:9.5,ep:23,cur:23,g:['战斗','奇幻','校园'],c1:'#DB2777',c2:'#F472B6',d:'虎杖悠仁在涩谷事变后的成长故事。五条悟的过去被揭开。',s:'已完结',y:'2023',fav:0,img:'https://cdn.myanimelist.net/images/anime/1792/138022l.jpg'},
+  {t:'间谍过家家 第二季',r:9.4,ep:25,cur:12,g:['喜剧','日常','动作'],c1:'#D97706',c2:'#FCD34D',d:'间谍黄昏、杀手约尔、超能力者阿尼亚组成的虚假家庭。',s:'连载中',y:'2023',fav:1,img:'https://cdn.myanimelist.net/images/anime/1111/137832l.jpg'},
+  {t:'葬送的芙莉莲',r:9.7,ep:28,cur:28,g:['奇幻','冒险','治愈'],c1:'#059669',c2:'#6EE7B7',d:'魔王被打败后，精灵魔法使芙莉莲踏上了了解人类的旅程。',s:'已完结',y:'2023',fav:0,img:'https://cdn.myanimelist.net/images/anime/1015/138697l.jpg'},
+  {t:'排球少年!! 垃圾场决战',r:9.3,ep:10,cur:10,g:['运动','热血','青春'],c1:'#EA580C',c2:'#FB923C',d:'日向翔阳与影山飞雄在春高排球赛上与音驹高中的宿命对决。',s:'已完结',y:'2024',fav:0,img:'https://cdn.myanimelist.net/images/anime/1209/140751l.jpg'},
+  {t:'药屋少女的呢喃',r:9.5,ep:24,cur:24,g:['悬疑','宫廷','推理'],c1:'#9333EA',c2:'#C084FC',d:'猫猫在后宫中运用药学知识解决各种谜案。',s:'已完结',y:'2023',fav:0,img:'https://cdn.myanimelist.net/images/anime/1783/141527l.jpg'},
+  {t:'我独自升级',r:9.2,ep:12,cur:12,g:['动作','奇幻','升级'],c1:'#2563EB',c2:'#60A5FA',d:'程肖宇从最弱猎人成长为最强存在的故事。',s:'已完结',y:'2024',fav:0,img:'https://cdn.myanimelist.net/images/anime/1008/141823l.jpg'},
+  {t:'迷宫饭',r:9.1,ep:24,cur:12,g:['奇幻','美食','冒险'],c1:'#65A30D',c2:'#A3E635',d:'莱欧斯一行人在迷宫中一边冒险一边烹饪魔物料理。',s:'连载中',y:'2024',fav:0,img:'https://cdn.myanimelist.net/images/anime/1100/141824l.jpg'},
+  {t:'怪兽8号',r:9.0,ep:12,cur:12,g:['动作','科幻','热血'],c1:'#0891B2',c2:'#22D3EE',d:'日比野卡夫卡在32岁时变身为怪兽，获得了成为防卫队员的机会。',s:'已完结',y:'2024',fav:0,img:'https://cdn.myanimelist.net/images/anime/1494/141825l.jpg'},
+  {t:'蓝色监狱',r:9.1,ep:24,cur:24,g:['运动','竞技','心理'],c1:'#1D4ED8',c2:'#3B82F6',d:'为了培养世界最强前锋，300名天才少年被关进蓝色监狱。',s:'已完结',y:'2022',fav:0,img:'https://cdn.myanimelist.net/images/anime/1258/126929l.jpg'},
+  {t:'物理魔法使马修',r:8.9,ep:12,cur:12,g:['喜剧','奇幻','校园'],c1:'#C026D3',c2:'#E879F9',d:'在魔法至上的世界里，马修用纯粹的物理力量闯出一片天。',s:'已完结',y:'2023',fav:0,img:'https://cdn.myanimelist.net/images/anime/1564/138699l.jpg'},
+  {t:'天国大魔境',r:9.2,ep:13,cur:13,g:['冒险','悬疑','末世'],c1:'#57534E',c2:'#A8A29E',d:'在末日后的日本，少年与少女踏上了寻找"天国"的旅程。',s:'已完结',y:'2023',fav:0,img:'https://cdn.myanimelist.net/images/anime/1036/138700l.jpg'},
 ];
 
 // ===== CANVAS DRAW =====
@@ -403,8 +403,7 @@ let curDetail=null,playing=false,prog=0,lastT=0,qs=['流畅','高清','原画'],
 // ===== INIT =====
 function init(){
   // Hero
-  const hc=document.getElementById('heroCanvas');
-  drawPoster(hc,A[0],true);
+  document.getElementById('heroImg').src=A[0].img;
   document.getElementById('heroName').textContent=A[0].t;
   document.getElementById('heroInfo').innerHTML=`<span>★ ${A[0].r}</span><span class="sep"></span><span>第${A[0].cur}集</span><span class="sep"></span><span>${A[0].g.join(' / ')}</span>`;
   renderHRow();renderGrid();renderFav();renderHist();renderSet();
@@ -415,30 +414,26 @@ function renderHRow(){
   const watch=A.filter(a=>a.fav&&a.cur<a.ep);
   el.innerHTML=watch.map((a,i)=>{
     const id=A.indexOf(a);
-    return`<div class="h-card" onclick="openDetail(${id})"><div class="h-card-img"><canvas width="280" height="380" data-i="${id}" data-t="h"></canvas><div class="h-card-badge watching">追番中</div><div class="h-card-prog"><div class="h-card-prog-bar" style="width:${Math.round(a.cur/a.ep*100)}%"></div></div><div class="h-card-ep">第${a.cur}集</div></div><div class="h-card-title">${a.t}</div></div>`;
+    return`<div class="h-card" onclick="openDetail(${id})"><div class="h-card-img"><img src="${a.img}" alt="${a.t}" loading="lazy" style="width:100%;height:100%;object-fit:cover"><div class="h-card-badge watching">追番中</div><div class="h-card-prog"><div class="h-card-prog-bar" style="width:${Math.round(a.cur/a.ep*100)}%"></div></div><div class="h-card-ep">第${a.cur}集</div></div><div class="h-card-title">${a.t}</div></div>`;
   }).join('');
-  el.querySelectorAll('canvas[data-t="h"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
 }
 
 function renderGrid(){
   const el=document.getElementById('gGrid');
-  el.innerHTML=A.map((a,i)=>`<div class="g-card" onclick="openDetail(${i})"><div class="g-card-img"><canvas width="200" height="267" data-i="${i}" data-t="g"></canvas><div class="g-card-score">${a.r}</div></div><div class="g-card-title">${a.t}</div><div class="g-card-meta">${a.ep}集 · ${a.y}</div></div>`).join('');
-  el.querySelectorAll('canvas[data-t="g"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+  el.innerHTML=A.map((a,i)=>`<div class="g-card" onclick="openDetail(${i})"><div class="g-card-img"><img src="${a.img}" alt="${a.t}" loading="lazy" style="width:100%;height:100%;object-fit:cover"><div class="g-card-score">${a.r}</div></div><div class="g-card-title">${a.t}</div><div class="g-card-meta">${a.ep}集 · ${a.y}</div></div>`).join('');
 }
 
 function renderFav(){
   const el=document.getElementById('favList');
   const favs=A.filter(a=>a.fav);
   if(!favs.length){el.innerHTML='<div class="empty"><div class="empty-i">📚</div><div class="empty-t">还没有追番</div></div>';return}
-  el.innerHTML=favs.map(a=>{const i=A.indexOf(a);return`<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" onclick="openDetail(${i})"><div style="width:72px;height:96px;border-radius:10px;overflow:hidden;flex-shrink:0"><canvas width="144" height="192" data-i="${i}" data-t="f"></canvas></div><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div style="font-size:14px;font-weight:600">${a.t}</div><div style="font-size:12px;color:var(--t2);margin-top:4px">看到第${a.cur}集 / 共${a.ep}集</div><div style="font-size:11px;color:var(--ok);margin-top:6px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--ok);border-radius:50%;display:inline-block"></span>${a.s}</div></div></div>`}).join('');
-  el.querySelectorAll('canvas[data-t="f"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+  el.innerHTML=favs.map(a=>{const i=A.indexOf(a);return`<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" onclick="openDetail(${i})"><div style="width:72px;height:96px;border-radius:10px;overflow:hidden;flex-shrink:0"><img src="${a.img}" alt="${a.t}" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div style="font-size:14px;font-weight:600">${a.t}</div><div style="font-size:12px;color:var(--t2);margin-top:4px">看到第${a.cur}集 / 共${a.ep}集</div><div style="font-size:11px;color:var(--ok);margin-top:6px;display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:var(--ok);border-radius:50%;display:inline-block"></span>${a.s}</div></div></div>`}).join('');
 }
 
 function renderHist(){
   const el=document.getElementById('histList');
   const h=A.slice(0,5);
-  el.innerHTML=h.map((a,i)=>{const id=A.indexOf(a);return`<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" onclick="openDetail(${id})"><div style="width:72px;height:96px;border-radius:10px;overflow:hidden;flex-shrink:0"><canvas width="144" height="192" data-i="${id}" data-t="h2"></canvas></div><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div style="font-size:14px;font-weight:600">${a.t}</div><div style="font-size:12px;color:var(--t3);margin-top:4px">${['刚刚','5分钟前','1小时前','昨天','2天前'][i]}</div></div></div>`}).join('');
-  el.querySelectorAll('canvas[data-t="h2"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+  el.innerHTML=h.map((a,i)=>{const id=A.indexOf(a);return`<div style="display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer" onclick="openDetail(${id})"><div style="width:72px;height:96px;border-radius:10px;overflow:hidden;flex-shrink:0"><img src="${a.img}" alt="${a.t}" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div><div style="flex:1;display:flex;flex-direction:column;justify-content:center"><div style="font-size:14px;font-weight:600">${a.t}</div><div style="font-size:12px;color:var(--t3);margin-top:4px">${['刚刚','5分钟前','1小时前','昨天','2天前'][i]}</div></div></div>`}).join('');
 }
 
 function renderSet(){
@@ -490,7 +485,7 @@ function goTab(el){
 // ===== MODAL =====
 function openDetail(i){
   curDetail=A[i];
-  drawPoster(document.getElementById('mCanvas'),curDetail,true);
+  document.getElementById('mImg').src=curDetail.img;
   document.getElementById('mTitle').textContent=curDetail.t;
   document.getElementById('mMeta').innerHTML=`<span>★ ${curDetail.r}</span><span class="sep"></span><span>${curDetail.ep}集</span><span class="sep"></span><span>${curDetail.y}</span><span class="sep"></span><span>${curDetail.s}</span>`;
   document.getElementById('mDesc').textContent=curDetail.d;
@@ -508,6 +503,11 @@ function openPlayer(i,ep){
   const a=A[i];closeModal();
   document.getElementById('pTitle').textContent=a.t;
   document.getElementById('pEpT').textContent=`第${ep+1}集 / 共${a.ep}集`;
+  // Use sample video
+  const vid=document.getElementById('pVideo');
+  vid.poster=a.img;
+  vid.src='https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+  vid.load();
   prog=12+Math.random()*18;
   document.getElementById('pFill').style.width=prog+'%';
   const tot=23*60+45,cur=Math.floor(tot*prog/100);
@@ -517,10 +517,23 @@ function openPlayer(i,ep){
   document.getElementById('pPlayBtn').textContent='▶';
   document.getElementById('player').classList.add('on');
   document.body.style.overflow='hidden';
-  initPlayerCanvas(a);
+  vid.addEventListener('timeupdate',onVidTime);
+  vid.addEventListener('ended',onVidEnd);
 }
 function playFromModal(){if(!curDetail)return;openPlayer(A.indexOf(curDetail),curDetail.cur-1)}
-function closePlayer(){document.getElementById('player').classList.remove('on');document.body.style.overflow='';playing=false}
+function closePlayer(){
+  const vid=document.getElementById('pVideo');
+  vid.pause();vid.src='';
+  vid.removeEventListener('timeupdate',onVidTime);
+  vid.removeEventListener('ended',onVidEnd);
+  document.getElementById('player').classList.remove('on');
+  document.body.style.overflow='';playing=false;
+}
+function onVidTime(){
+  const vid=document.getElementById('pVideo');
+  if(vid.duration){prog=(vid.currentTime/vid.duration)*100;document.getElementById('pFill').style.width=prog+'%';updateTime()}
+}
+function onVidEnd(){playing=false;document.getElementById('pBig').style.display='';document.getElementById('pPlayBtn').textContent='▶'}
 
 // Player canvas
 let pCtx,pW,pH,pParts,pShapes;
@@ -566,14 +579,13 @@ function drawPlayer(){
 }
 
 function togglePlay(){
-  playing=!playing;lastT=0;
-  document.getElementById('pPlayBtn').textContent=playing?'⏸':'▶';
-  document.getElementById('pBig').style.display=playing?'none':'';
-  if(playing)drawPlayer();
+  const vid=document.getElementById('pVideo');
+  if(vid.paused){vid.play();playing=true;document.getElementById('pPlayBtn').textContent='⏸';document.getElementById('pBig').style.display='none'}
+  else{vid.pause();playing=false;document.getElementById('pPlayBtn').textContent='▶';document.getElementById('pBig').style.display=''}
 }
-function skip(s){prog=Math.max(0,Math.min(100,prog+s/(23*60+45)*100));document.getElementById('pFill').style.width=prog+'%';updateTime()}
-function seekTo(e){const r=e.currentTarget.getBoundingClientRect();prog=Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100));document.getElementById('pFill').style.width=prog+'%';updateTime()}
-function updateTime(){const tot=23*60+45,cur=Math.floor(tot*prog/100);document.getElementById('pCur').textContent=Math.floor(cur/60)+':'+String(cur%60).padStart(2,'0')}
+function skip(s){const vid=document.getElementById('pVideo');if(vid.duration){vid.currentTime=Math.max(0,Math.min(vid.duration,vid.currentTime+s))}}
+function seekTo(e){const vid=document.getElementById('pVideo');if(vid.duration){const r=e.currentTarget.getBoundingClientRect();vid.currentTime=((e.clientX-r.left)/r.width)*vid.duration}}
+function updateTime(){const vid=document.getElementById('pVideo');if(vid.duration){const cur=Math.floor(vid.currentTime);document.getElementById('pCur').textContent=Math.floor(cur/60)+':'+String(cur%60).padStart(2,'0');document.getElementById('pTot').textContent=Math.floor(vid.duration/60)+':'+String(Math.floor(vid.duration%60)).padStart(2,'0')}}
 function cycleQ(){qi=(qi+1)%qs.length;document.getElementById('pQ').textContent=qs[qi]}
 
 // Auto-progress
@@ -585,8 +597,7 @@ function doSearch(q){
   if(!q.trim()){renderGrid();return}
   const res=A.filter(a=>a.t.includes(q)||a.g.some(g=>g.includes(q)));
   if(!res.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-i">🔍</div><div class="empty-t">没有找到相关番剧</div></div>';return}
-  el.innerHTML=res.map(a=>{const i=A.indexOf(a);return`<div class="g-card" onclick="openDetail(${i})"><div class="g-card-img"><canvas width="200" height="267" data-i="${i}" data-t="gs"></canvas><div class="g-card-score">${a.r}</div></div><div class="g-card-title">${a.t}</div><div class="g-card-meta">${a.ep}集 · ${a.y}</div></div>`}).join('');
-  el.querySelectorAll('canvas[data-t="gs"]').forEach(c=>drawPoster(c,A[c.dataset.i],false));
+  el.innerHTML=res.map(a=>{const i=A.indexOf(a);return`<div class="g-card" onclick="openDetail(${i})"><div class="g-card-img"><img src="${a.img}" alt="${a.t}" loading="lazy" style="width:100%;height:100%;object-fit:cover"><div class="g-card-score">${a.r}</div></div><div class="g-card-title">${a.t}</div><div class="g-card-meta">${a.ep}集 · ${a.y}</div></div>`}).join('');
 }
 
 // ===== KEYBOARD =====
